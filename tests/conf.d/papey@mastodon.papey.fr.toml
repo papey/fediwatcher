@@ -1,0 +1,7 @@
+name = "papey"
+url = "https://mastodon.papey.fr"
+kind = "mastodon_user"
+
+[options]
+user_id = "1"
+
