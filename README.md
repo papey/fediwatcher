@@ -1,5 +1,7 @@
 # Fediwatcher
 
+[![Build Status](https://drone.github.papey.fr/api/badges/papey/fediwatcher/status.svg)](https://drone.github.papey.fr/papey/fediwatcher)
+
 Fediwatcher is a [rust](https://www.rust-lang.org/) app used to fetch various
 metrics from [fediverse instances](https://fediverse.party) and push all the
 results into an InfluxDB server.
@@ -67,6 +69,10 @@ systemd timers or any other method of your choice.
 CONFD=./tests/conf.d cargo test
 ```
 
+## Continous Integration
+
+See [drone.github.papey.fr/papey/fediwatcher](https://drone.github.papey.fr/papey/fediwatcher)
+
 ## Built With
 
 - [Influent.rs](https://github.com/gobwas/influent.rs) - InfluxDB rust library
@@ -78,7 +84,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-- **Wilfried OLLIVIER** - *Main author* - [Papey](https://github.com/papey)
+- **Wilfried OLLIVIER** - _Main author_ - [Papey](https://github.com/papey)
 
 ## License
 
