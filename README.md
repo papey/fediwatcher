@@ -44,7 +44,7 @@ cargo build --release
 
 ##### From Docker Hub
 
-See [papey/fediwatcher](https://cloud.docker.com/repository/docker/papey/fediwatcher) on Docker Hub
+See [papey/fediwatcher](https://hub.docker.com/r/papey/fediwatcher) on Docker Hub
 
 ### Usage
 
