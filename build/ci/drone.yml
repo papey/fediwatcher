@@ -17,3 +17,17 @@ steps:
     image: rust:1.36.0
     commands:
       - cargo build
+
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      repo: papey/fediwatcher
+      auto_tag: true
+      dry_run: yes
+      build_args:
+        - REVISION=$$CI_COMMIT
+        - RELEASE_TAG=$$CI_TAG
