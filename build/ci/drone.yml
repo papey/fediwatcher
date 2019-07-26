@@ -1,0 +1,8 @@
+kind: pipeline
+name: main
+
+steps:
+  - name: fmt
+    image: rust:1.36
+    commands:
+      - cargo fmt -- --check
