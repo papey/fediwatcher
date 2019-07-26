@@ -12,6 +12,13 @@ local rust = "rust:1.36.0";
                     "rustup component add rustfmt --toolchain " + rust + "-x86_64-unknown-linux-gnu"
                 ],
             },
+            {
+                name: "tests",
+                image: rust,
+                commands: [
+                    "cargo test"
+                ],
+            },
         ],
     },
 ]
