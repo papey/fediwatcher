@@ -97,4 +97,5 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 ## Acknowledgments
 
 - Inspired by [fediverse.network](https://fediverse.network) made by [fediverse](https://github.com/fediverse)
-- This is mainly a rust learning project
+- This is mainly a rust learning project, so huge thanks to all the rusteceans from Mastodon and the [Rust Lang Discord
+  Server](https://discordapp.com/invite/rust-lang) for all the help !
