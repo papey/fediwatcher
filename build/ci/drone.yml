@@ -27,7 +27,6 @@ steps:
         from_secret: docker_password
       repo: papey/fediwatcher
       auto_tag: true
-      dry_run: yes
       build_args:
         - REVISION=$$CI_COMMIT
         - RELEASE_TAG=$$CI_TAG
