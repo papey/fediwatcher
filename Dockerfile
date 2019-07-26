@@ -4,11 +4,9 @@ FROM rust:1.36
 # Declare args
 ARG REVISION
 ARG RELEASE_TAG
-ARG BUILD_DATE
 
 # image-spec annotations using labels
 # https://github.com/opencontainers/image-spec/blob/master/annotations.md
-LABEL org.opencontainers.image.created=${BUILD_DATE}
 LABEL org.opencontainers.image.source="https://github.com/papey/fediwatcher"
 LABEL org.opencontainers.image.revision=${GIT_COMMIT_SHA}
 LABEL org.opencontainers.image.version=${RELEASE_TAG}
