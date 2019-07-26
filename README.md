@@ -42,6 +42,10 @@ Clone this repo and run
 cargo build --release
 ```
 
+##### From Docker Hub
+
+See [papey/fediwatcher](https://cloud.docker.com/repository/docker/papey/fediwatcher) on Docker Hub
+
 ### Usage
 
 ```sh
