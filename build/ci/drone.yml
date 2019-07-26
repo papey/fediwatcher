@@ -12,3 +12,8 @@ steps:
     image: rust:1.36.0
     commands:
       - cargo test
+
+  - name: build
+    image: rust:1.36.0
+    commands:
+      - cargo build
