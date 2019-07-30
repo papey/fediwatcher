@@ -94,6 +94,14 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 [LICENSE](LICENSE) file for details
 
+## Public Instance
+
+Want to see Fediwatcher in action ? No problem ! There is a [public instance](https://metrics.papey.fr) !
+
+Want metrics for you instance or you as a user ? Just [contact me](https://papey.fr/#contact) !
+
+Finaly, all dashboards on the public instance can be downloaded freely using the `share` button on Grafana UI ! Enjoy !
+
 ## Acknowledgments
 
 - Inspired by [fediverse.network](https://fediverse.network) made by [fediverse](https://github.com/fediverse)
