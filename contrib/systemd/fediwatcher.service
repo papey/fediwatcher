@@ -1,0 +1,13 @@
+[Unit]
+Description=Fediwatcher service
+After=network.target
+
+[Service]
+Type=oneshot
+User=fediwatcher
+EnvironmentFile=/opt/fediwatcher/env
+ExecStart=/opt/fediwatcher/fediwatcher-0.1.0/target/release/fediwatcher
+RemainAfterExit=false
+
+[Install]
+WantedBy=multi-user.target
