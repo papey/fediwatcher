@@ -57,10 +57,10 @@ the `tests` directory for real life examples.
 
 To specify a custom InfluxDB server, Fediwatcher use environment variables, eg :
 
-- INFLUX_DATABASE=fediwatcher
-- INFLUX_PASSWORD=f3d1w4tch3r
-- INFLUX_USER=fediwatcher
-- INFLUX_HOST=[http://localhost:8086](http://localhost:8086)
+- INFLUXDB_DATABASE=fediwatcher
+- INFLUXDB_PASSWORD=f3d1w4tch3r
+- INFLUXDB_USER=fediwatcher
+- INFLUXDB_HOST=[http://localhost:8086](http://localhost:8086)
 
 #### Notes
 
