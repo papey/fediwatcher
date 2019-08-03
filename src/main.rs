@@ -4,46 +4,17 @@
 extern crate log;
 
 // mods
+mod app;
 mod config;
 mod get;
 mod influx;
 
 // Uses
 use clap::{App, Arg};
-use influent::client::ClientError as InfluentError;
-
-// AppError
-// Define AppError
-#[derive(Debug)]
-enum AppError {
-    GetError(get::GetError),
-    Str(String),
-    InfluxError(InfluentError),
-}
-
-// GetError
-impl From<get::GetError> for AppError {
-    fn from(err: get::GetError) -> AppError {
-        AppError::GetError(err)
-    }
-}
-
-// Str
-impl From<String> for AppError {
-    fn from(err: String) -> AppError {
-        AppError::Str(err)
-    }
-}
-
-// InfluxError
-impl From<InfluentError> for AppError {
-    fn from(err: InfluentError) -> AppError {
-        AppError::InfluxError(err)
-    }
-}
+use std::process;
 
 // Entry point
-fn main() -> Result<(), AppError> {
+fn main() {
     env_logger::init();
 
     // Setup command line args and options
@@ -105,36 +76,12 @@ and push all the results into an InfluxDB server"#,
         // get all the matches and ! good to go !
         .get_matches();
 
-    // get configs info by walking inside conf.d directory
-    let configs = match config::get_configs_files(matches.value_of("conf.d").unwrap()) {
-        Some(configs) => configs,
-        None => panic!(
-            "No config file found in {} directory",
-            matches.value_of("conf.d").unwrap()
-        ),
-    };
+    // Check if the returned value is an error
+    if let Err(e) = app::run(matches) {
+        // print error to stderr
+        eprintln!("Application error: {:?}", e);
 
-    // ensure conn to influx
-    let client = influx::push::create_influx_client(
-        matches.value_of("influx_user").unwrap(),
-        matches.value_of("influx_password").unwrap(),
-        matches.value_of("influx_database").unwrap(),
-        matches.value_of("influx_host").unwrap(),
-    );
-
-    for conf in configs {
-        // analysing conf
-        debug!("Analysing conf {} of kind {}", &conf.name, &conf.kind);
-
-        // get data
-        let data = get::get_data(&conf)?;
-
-        // translate data
-        let measurement = influx::translate::new_from(&data, &conf)?;
-
-        // push data to influxdb
-        influx::push::push_measurement(&client, measurement)?;
+        // exit with an error code
+        process::exit(1);
     }
-
-    Ok(())
 }
