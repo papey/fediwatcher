@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  fediwatcher:
+    image: papey/fediwatcher:${FEDIWATCHER_VERSION}
+    volumes:
+      - ./tests/conf.d:/etc/fediwatcher/conf.d
+    environment:
+      - INFLUXDB_DATABASE=${INFLUXDB_DB}
+      - INFLUXDB_USER=${INFLUXDB_USER}
+      - INFLUXDB_PASSWORD=${INFLUXDB_USER_PASSWORD}
+      - INFLUXDB_HOST=http://${INFLUXDB_HOST}:8086
+    depends_on:
+      - influxdb
+      - grafana
