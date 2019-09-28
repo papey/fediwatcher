@@ -6,7 +6,7 @@ use url::Url;
 
 // Const
 // array of supported kinds
-pub const SUPPORTED: [&str; 3] = ["mastodon", "mastodon_user", "pleroma"];
+pub const SUPPORTED: [&str; 4] = ["mastodon", "mastodon_user", "pleroma", "pleroma_user"];
 
 // Errors
 // Define NotSupportedError
@@ -243,9 +243,10 @@ mod tests {
         let configs = get_configs_files("./tests/conf.d").unwrap();
 
         // assert
-        assert_eq!(configs[1].name, "mastodon.papey.fr");
-        assert_eq!(configs[2].kind, "mastodon_user");
+        assert_eq!(configs[2].name, "mastodon.papey.fr");
+        assert_eq!(configs[3].kind, "mastodon_user");
         assert_eq!(configs[0].kind, "pleroma");
         assert_eq!(configs[0].url, "https://pleroma.fr");
+        assert_eq!(configs[1].kind, "pleroma_user");
     }
 }
