@@ -10,6 +10,8 @@ Fediwatcher currently supports :
 
 - Mastodon : to get metrics from a Mastodon instance
 - Mastodon User : to get metrics from a specific user on a Mastodon instance
+- Pleroma : to get metrics from a Pleroma instance
+- Pleroma User : to get metrics from a specific user on a Pleroma instance
 
 ## Getting Started
 
