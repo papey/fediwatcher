@@ -44,7 +44,7 @@ impl From<serde_json::Error> for GetError {
 fn forge_api_url(conf: &Config) -> Option<String> {
     // match if stuff is supported
     match conf.kind.as_str() {
-        "mastodon" => {
+        "mastodon" | "pleroma" => {
             return Some(format!("{}{}", conf.url, "/api/v1/instance"));
         }
         "mastodon_user" => {
