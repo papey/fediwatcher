@@ -54,7 +54,7 @@ impl fmt::Display for Measurement {
 pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, String> {
     // match on kind
     match conf.kind.as_str() {
-        "mastodon" | "pleroma" => Ok(new_from_mastodon_or_plemora(val, conf)),
+        "mastodon" | "pleroma" => Ok(new_from_mastodon_or_pleroma(val, conf)),
         "mastodon_user" => Ok(new_from_mastodon_user(val, conf)),
         _ => Err(String::from("Error getting data")),
     }
@@ -62,7 +62,7 @@ pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, S
 
 // Function - private
 // new_from_mastodon will take data from mastodon instance and convert it into a Measurement
-fn new_from_mastodon_or_plemora(val: &serde_json::Value, conf: &Config) -> Measurement {
+fn new_from_mastodon_or_pleroma(val: &serde_json::Value, conf: &Config) -> Measurement {
     let mut mesurement: Measurement = Measurement::default();
 
     // add tags
@@ -151,7 +151,7 @@ mod tests {
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_or_plemora(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma(&json, &conf);
 
         assert_eq!(mesurement.fields["users"], DataField::Int(31));
         assert_eq!(mesurement.fields["posts"], DataField::Int(28354));
@@ -162,13 +162,13 @@ mod tests {
         // prepare
         let conf = create_test_config();
 
-        let file = File::open("./tests/json/test.new.from.plemora.json")
+        let file = File::open("./tests/json/test.new.from.pleroma.json")
             .expect("Unable to read test file");
 
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_or_plemora(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma(&json, &conf);
 
         assert_eq!(mesurement.fields["users"], DataField::Int(132));
         assert_eq!(mesurement.fields["posts"], DataField::Int(30687));
