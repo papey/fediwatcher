@@ -152,5 +152,4 @@ mod tests {
             Err(_) => panic!("Error, this kind of config is not supported"),
         }
     }
-
 }
