@@ -47,7 +47,7 @@ fn forge_api_url(conf: &Config) -> Option<String> {
         "mastodon" | "pleroma" => {
             return Some(format!("{}{}", conf.url, "/api/v1/instance"));
         }
-        "mastodon_user" => {
+        "mastodon_user" | "pleroma_user" => {
             return conf
                 .get_user_id()
                 .and_then(|uid| Some(format!("{}{}{}", conf.url, "/api/v1/accounts/", uid)))
