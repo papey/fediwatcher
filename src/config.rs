@@ -6,7 +6,7 @@ use url::Url;
 
 // Const
 // array of supported kinds
-pub const SUPPORTED: [&str; 2] = ["mastodon", "mastodon_user"];
+pub const SUPPORTED: [&str; 4] = ["mastodon", "mastodon_user", "pleroma", "pleroma_user"];
 
 // Errors
 // Define NotSupportedError
@@ -235,15 +235,5 @@ mod tests {
             Ok(_) => assert!(true),
             Err(_) => panic!("verify_url test should failed... :shrug:"),
         }
-    }
-
-    #[test]
-    fn test_get_configs_files() {
-        // prepare
-        let configs = get_configs_files("./tests/conf.d").unwrap();
-
-        // assert
-        assert_eq!(configs[0].name, "mastodon.papey.fr");
-        assert_eq!(configs[1].kind, "mastodon_user");
     }
 }

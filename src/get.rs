@@ -44,10 +44,10 @@ impl From<serde_json::Error> for GetError {
 fn forge_api_url(conf: &Config) -> Option<String> {
     // match if stuff is supported
     match conf.kind.as_str() {
-        "mastodon" => {
+        "mastodon" | "pleroma" => {
             return Some(format!("{}{}", conf.url, "/api/v1/instance"));
         }
-        "mastodon_user" => {
+        "mastodon_user" | "pleroma_user" => {
             return conf
                 .get_user_id()
                 .and_then(|uid| Some(format!("{}{}{}", conf.url, "/api/v1/accounts/", uid)))
@@ -152,5 +152,4 @@ mod tests {
             Err(_) => panic!("Error, this kind of config is not supported"),
         }
     }
-
 }

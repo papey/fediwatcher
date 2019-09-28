@@ -1,0 +1,7 @@
+name = "arthurisson"
+url = "https://social.thaega.fr"
+kind = "pleroma_user"
+
+[options]
+user_id = "arthurisson"
+
