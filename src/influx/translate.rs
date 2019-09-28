@@ -55,7 +55,7 @@ pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, S
     // match on kind
     match conf.kind.as_str() {
         "mastodon" | "pleroma" => Ok(new_from_mastodon_or_pleroma(val, conf)),
-        "mastodon_user" => Ok(new_from_mastodon_user(val, conf)),
+        "mastodon_user" | "pleroma_user" => Ok(new_from_mastodon_or_pleroma_user(val, conf)),
         _ => Err(String::from("Error getting data")),
     }
 }
@@ -101,7 +101,7 @@ fn new_from_mastodon_or_pleroma(val: &serde_json::Value, conf: &Config) -> Measu
 }
 
 // new_from_mastodon_user will take data from a mastodon user and convert it into a Measurement
-fn new_from_mastodon_user(val: &serde_json::Value, conf: &Config) -> Measurement {
+fn new_from_mastodon_or_pleroma_user(val: &serde_json::Value, conf: &Config) -> Measurement {
     let mut mesurement: Measurement = Measurement::default();
 
     // add tags
@@ -185,9 +185,26 @@ mod tests {
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_user(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma_user(&json, &conf);
 
         assert_eq!(mesurement.fields["followers"], DataField::Int(274));
         assert_eq!(mesurement.fields["statuses"], DataField::Int(15392));
+    }
+
+    #[test]
+    fn test_new_from_pleroma_user() {
+        // prepare
+        let conf = create_test_config();
+
+        let file = File::open("./tests/json/test.new.from.pleroma_user.json")
+            .expect("Unable to read test file");
+
+        let json = serde_json::from_reader(file).expect("Error parsing json file");
+
+        // launch test
+        let mesurement = new_from_mastodon_or_pleroma_user(&json, &conf);
+
+        assert_eq!(mesurement.fields["followers"], DataField::Int(7));
+        assert_eq!(mesurement.fields["statuses"], DataField::Int(42));
     }
 }
