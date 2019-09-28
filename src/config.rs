@@ -236,17 +236,4 @@ mod tests {
             Err(_) => panic!("verify_url test should failed... :shrug:"),
         }
     }
-
-    #[test]
-    fn test_get_configs_files() {
-        // prepare
-        let configs = get_configs_files("./tests/conf.d").unwrap();
-
-        // assert
-        assert_eq!(configs[2].name, "mastodon.papey.fr");
-        assert_eq!(configs[3].kind, "mastodon_user");
-        assert_eq!(configs[0].kind, "pleroma");
-        assert_eq!(configs[0].url, "https://pleroma.fr");
-        assert_eq!(configs[1].kind, "pleroma_user");
-    }
 }
