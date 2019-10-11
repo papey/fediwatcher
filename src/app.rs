@@ -55,14 +55,15 @@ pub fn run(matches: clap::ArgMatches) -> Result<(), AppError> {
         // analysing conf
         debug!("Analysing conf {} of kind {}", &conf.name, &conf.kind);
 
-        // get data
-        let data = get::get_data(&conf)?;
-
-        // translate data
-        let measurement = influx::translate::new_from(&data, &conf)?;
-
-        // push data to influxdb
-        influx::push::push_measurement(&client, measurement)?;
+        match get::get_data(&conf) {
+            Ok(data) => {
+                // translate data
+                let measurement = influx::translate::new_from(&data, &conf)?;
+                // push data to influxdb
+                influx::push::push_measurement(&client, measurement)?;
+            }
+            Err(_) => warn!("Error getting data for config {}", conf.name),
+        }
     }
 
     Ok(())
