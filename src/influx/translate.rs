@@ -160,7 +160,10 @@ fn new_from_mastodon_or_pleroma_user(val: &serde_json::Value, conf: &Config) -> 
         .fields
         .insert("followers".to_string(), DataField::Int(followers));
     // local_posts
-    let following: i64 = val["following_count"].as_i64().unwrap();
+    let following: i64 = match val["following_count"].as_i64() {
+        Some(val) => val,
+        None => 0,
+    };
     mesurement
         .fields
         .insert("following".to_string(), DataField::Int(following));
