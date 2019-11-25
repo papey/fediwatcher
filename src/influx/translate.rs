@@ -56,11 +56,52 @@ pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, S
     match conf.kind.as_str() {
         "mastodon" | "pleroma" => Ok(new_from_mastodon_or_pleroma(val, conf)),
         "mastodon_user" | "pleroma_user" => Ok(new_from_mastodon_or_pleroma_user(val, conf)),
+        "plume" => Ok(new_from_plume(val, conf)),
         _ => Err(String::from("Error getting data")),
     }
 }
 
 // Function - private
+// new_from_plume will take data from plume instance and convert it into a Measurement
+fn new_from_plume(val: &serde_json::Value, conf: &Config) -> Measurement {
+    let mut mesurement: Measurement = Measurement::default();
+
+    // add tags
+    // kind is the key
+    mesurement.key = conf.kind.clone();
+
+    // name
+    mesurement
+        .tags
+        .insert("name".to_string(), conf.name.clone());
+    // name
+    mesurement.tags.insert("url".to_string(), conf.url.clone());
+
+    // add fielts
+    // user_count
+    let users: i64 = val["usage"]["users"]["total"].as_i64().unwrap();
+    mesurement
+        .fields
+        .insert("users".to_string(), DataField::Int(users));
+    // local_posts
+    let local_posts: i64 = val["usage"]["localPosts"].as_i64().unwrap();
+    mesurement
+        .fields
+        .insert("local_posts".to_string(), DataField::Int(local_posts));
+    // comments
+    let local_comments: i64 = val["usage"]["localComments"].as_i64().unwrap();
+    mesurement
+        .fields
+        .insert("local_comments".to_string(), DataField::Int(local_comments));
+    // version
+    let version: String = val["software"]["version"].as_str().unwrap().to_string();
+    mesurement
+        .fields
+        .insert("version".to_string(), DataField::Str(version));
+
+    mesurement
+}
+
 // new_from_mastodon will take data from mastodon instance and convert it into a Measurement
 fn new_from_mastodon_or_pleroma(val: &serde_json::Value, conf: &Config) -> Measurement {
     let mut mesurement: Measurement = Measurement::default();
