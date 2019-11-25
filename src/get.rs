@@ -52,6 +52,7 @@ fn forge_api_url(conf: &Config) -> Option<String> {
                 .get_user_id()
                 .and_then(|uid| Some(format!("{}{}{}", conf.url, "/api/v1/accounts/", uid)))
         }
+        "plume" => return Some(format!("{}{}", conf.url, "/nodeinfo/2.0")),
         _ => {
             return None;
         }

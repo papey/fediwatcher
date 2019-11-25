@@ -6,7 +6,13 @@ use url::Url;
 
 // Const
 // array of supported kinds
-pub const SUPPORTED: [&str; 4] = ["mastodon", "mastodon_user", "pleroma", "pleroma_user"];
+pub const SUPPORTED: [&str; 5] = [
+    "mastodon",
+    "mastodon_user",
+    "pleroma",
+    "pleroma_user",
+    "plume",
+];
 
 // Errors
 // Define NotSupportedError
