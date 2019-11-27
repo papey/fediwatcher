@@ -74,10 +74,10 @@ fn new_from_plume(val: &serde_json::Value, conf: &Config) -> Measurement {
     mesurement
         .tags
         .insert("name".to_string(), conf.name.clone());
-    // name
+    // url
     mesurement.tags.insert("url".to_string(), conf.url.clone());
 
-    // add fielts
+    // add fields
     // user_count
     let users: i64 = val["usage"]["users"]["total"].as_i64().unwrap();
     mesurement
