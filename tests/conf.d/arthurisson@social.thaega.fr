@@ -4,4 +4,3 @@ kind = "pleroma_user"
 
 [options]
 user_id = "arthurisson"
-

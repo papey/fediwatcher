@@ -4,4 +4,3 @@ kind = "mastodon_user"
 
 [options]
 user_id = "1"
-
