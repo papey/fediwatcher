@@ -178,8 +178,8 @@ fn verify_url(conf: &Config) -> Result<(), ConfigError> {
 #[allow(dead_code)]
 pub fn create_test_config() -> Config {
     return Config::new(
-        "mastodon.papey.fr".to_string(),
-        "https://mastodon.papey.fr".to_string(),
+        "rage.love".to_string(),
+        "https://rage.love".to_string(),
         "mastodon".to_string(),
         None,
     );

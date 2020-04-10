@@ -107,7 +107,7 @@ mod tests {
 
         // launch tests and check results
         match forge_api_url(&test_ok) {
-            Some(url) => assert_eq!(url, "https://mastodon.papey.fr/api/v1/instance"),
+            Some(url) => assert_eq!(url, "https://rage.love/api/v1/instance"),
             None => panic!("Error in forge_url test"),
         };
     }
@@ -133,8 +133,8 @@ mod tests {
 
         // launch test and check result
         match get_data(&test_ok) {
-            // since signup is disable on mastodon.papey.fr, this should work, for now
-            Ok(data) => assert_eq!(data["stats"]["user_count"], 31),
+            // TODO: better test here
+            Ok(data) => assert_ne!(data["stats"]["user_count"], 0),
             Err(e) => panic!(e),
         }
     }
