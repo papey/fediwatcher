@@ -1,5 +1,5 @@
 # From latest rust stable version
-FROM rust:1.39
+FROM rust:1.43
 
 # Declare args
 ARG REVISION
