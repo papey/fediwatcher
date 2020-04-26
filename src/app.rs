@@ -10,6 +10,7 @@ pub enum AppError {
     GetError(get::GetError),
     Str(String),
     InfluxError(InfluentError),
+    ConfigError(config::ConfigError),
 }
 
 // GetError
@@ -33,18 +34,20 @@ impl From<InfluentError> for AppError {
     }
 }
 
+// InfluxError
+impl From<config::ConfigError> for AppError {
+    fn from(err: config::ConfigError) -> AppError {
+        AppError::ConfigError(err)
+    }
+}
+
 pub fn run(matches: clap::ArgMatches) -> Result<(), AppError> {
     // get configs info by walking inside conf.d directory
-    let configs = match config::get_configs_files(matches.value_of("conf.d").unwrap()) {
-        Some(configs) => configs,
-        None => panic!(
-            "No config file found in {} directory",
-            matches.value_of("conf.d").unwrap()
-        ),
-    };
+    let configs = config::get_configs_files(matches.value_of("conf.d").unwrap())?;
 
     // ensure conn to influx
     let client = influx::push::create_influx_client(
+        // unwraping is ok here since defaults value are set
         matches.value_of("influx_user").unwrap(),
         matches.value_of("influx_password").unwrap(),
         matches.value_of("influx_database").unwrap(),
@@ -62,7 +65,10 @@ pub fn run(matches: clap::ArgMatches) -> Result<(), AppError> {
                 // push data to influxdb
                 influx::push::push_measurement(&client, measurement)?;
             }
-            Err(_) => warn!("Error getting data for config {}", conf.name),
+            Err(e) => {
+                error!("{:?}", e);
+                warn!("Error getting data for config {}", conf.name);
+            }
         }
     }
 
