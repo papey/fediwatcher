@@ -72,25 +72,12 @@ pub fn get_data(conf: &Config) -> Result<serde_json::Value, GetError> {
     };
 
     // get request
-    let mut resp = match reqwest::get(uri.as_str()) {
-        Ok(r) => r,
-        Err(e) => {
-            error!("Error getting {}", conf.url);
-            return Err(GetError::from(e));
-        }
-    };
+    let mut resp = reqwest::get(uri.as_str())?;
 
     // extract resp to serde_json::Value
-    let json: Result<serde_json::Value, GetError> = resp
-        .text()
+    resp.text()
         .map_err(|e| GetError::from(e))
-        .and_then(|s| serde_json::from_str(s.as_str()).map_err(|e| GetError::from(e)));
-
-    // check if json is valid
-    match json {
-        Ok(json) => return Ok(json),
-        Err(e) => return Err(e),
-    };
+        .and_then(|s| serde_json::from_str(s.as_str()).map_err(|e| GetError::from(e)))
 }
 
 // Tests
