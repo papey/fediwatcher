@@ -4,6 +4,26 @@ use crate::config::Config;
 use std::collections::HashMap;
 use std::fmt;
 
+// Errors
+// Define TranslateError
+#[derive(Debug, Clone)]
+pub struct TranslateError {
+    field: String,
+    kind: String,
+    url: String,
+}
+
+// Implements for TranslateError
+impl fmt::Display for TranslateError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Error translating field {} for url {} on kind {}",
+            self.field, self.url, self.kind
+        )
+    }
+}
+
 // DataField enum
 #[derive(PartialEq)]
 pub enum DataField {
@@ -51,19 +71,22 @@ impl fmt::Display for Measurement {
 
 // Funcions - public
 // new_from wraps all the from kind
-pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, String> {
+pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, TranslateError> {
     // match on kind
     match conf.kind.as_str() {
-        "mastodon" | "pleroma" => Ok(new_from_mastodon_or_pleroma(val, conf)),
-        "mastodon_user" | "pleroma_user" => Ok(new_from_mastodon_or_pleroma_user(val, conf)),
-        "plume" => Ok(new_from_plume(val, conf)),
-        _ => Err(String::from("Error getting data")),
+        "mastodon" | "pleroma" => new_from_mastodon_or_pleroma(val, conf),
+        "mastodon_user" | "pleroma_user" => new_from_mastodon_or_pleroma_user(val, conf),
+        "plume" => new_from_plume(val, conf),
+        _ => panic!(
+            "Unrecoverable error config of kind {} not supported",
+            conf.kind
+        ),
     }
 }
 
 // Function - private
 // new_from_plume will take data from plume instance and convert it into a Measurement
-fn new_from_plume(val: &serde_json::Value, conf: &Config) -> Measurement {
+fn new_from_plume(val: &serde_json::Value, conf: &Config) -> Result<Measurement, TranslateError> {
     let mut mesurement: Measurement = Measurement::default();
 
     // add tags
@@ -79,31 +102,69 @@ fn new_from_plume(val: &serde_json::Value, conf: &Config) -> Measurement {
 
     // add fields
     // user_count
-    let users: i64 = val["usage"]["users"]["total"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("users".to_string(), DataField::Int(users));
-    // local_posts
-    let local_posts: i64 = val["usage"]["localPosts"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("local_posts".to_string(), DataField::Int(local_posts));
-    // comments
-    let local_comments: i64 = val["usage"]["localComments"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("local_comments".to_string(), DataField::Int(local_comments));
-    // version
-    let version: String = val["software"]["version"].as_str().unwrap().to_string();
-    mesurement
-        .fields
-        .insert("version".to_string(), DataField::Str(version));
+    match val["usage"]["users"]["total"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("users".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                field: String::from("users total"),
+                kind: conf.kind.clone(),
+                url: conf.url.clone(),
+            })
+        }
+    };
 
-    mesurement
+    // local_posts
+    match val["usage"]["localPosts"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("local_posts".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("local posts"),
+            })
+        }
+    };
+
+    // comments
+    match val["usage"]["localComments"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("local_comments".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("local comments"),
+            })
+        }
+    };
+
+    // version
+    match val["software"]["version"].as_str() {
+        Some(val) => mesurement
+            .fields
+            .insert("version".to_string(), DataField::Str(val.to_string())),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("version"),
+            })
+        }
+    };
+
+    Ok(mesurement)
 }
 
 // new_from_mastodon will take data from mastodon instance and convert it into a Measurement
-fn new_from_mastodon_or_pleroma(val: &serde_json::Value, conf: &Config) -> Measurement {
+fn new_from_mastodon_or_pleroma(
+    val: &serde_json::Value,
+    conf: &Config,
+) -> Result<Measurement, TranslateError> {
     let mut mesurement: Measurement = Measurement::default();
 
     // add tags
@@ -118,31 +179,69 @@ fn new_from_mastodon_or_pleroma(val: &serde_json::Value, conf: &Config) -> Measu
 
     // add fields
     // user_count
-    let users: i64 = val["stats"]["user_count"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("users".to_string(), DataField::Int(users));
-    // local_posts
-    let local_posts: i64 = val["stats"]["domain_count"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("local_posts".to_string(), DataField::Int(local_posts));
-    // posts
-    let posts: i64 = val["stats"]["status_count"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("posts".to_string(), DataField::Int(posts));
-    // version
-    let version: String = val["version"].as_str().unwrap().to_string();
-    mesurement
-        .fields
-        .insert("version".to_string(), DataField::Str(version));
+    match val["stats"]["user_count"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("users".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("user count"),
+            })
+        }
+    };
 
-    return mesurement;
+    // local_posts
+    match val["stats"]["domain_count"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("local_posts".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("domain count"),
+            })
+        }
+    };
+
+    // posts
+    match val["stats"]["status_count"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("posts".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("status count"),
+            })
+        }
+    };
+
+    // version
+    match val["version"].as_str() {
+        Some(val) => mesurement
+            .fields
+            .insert("version".to_string(), DataField::Str(String::from(val))),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("version"),
+            })
+        }
+    };
+
+    Ok(mesurement)
 }
 
 // new_from_mastodon_user will take data from a mastodon user and convert it into a Measurement
-fn new_from_mastodon_or_pleroma_user(val: &serde_json::Value, conf: &Config) -> Measurement {
+fn new_from_mastodon_or_pleroma_user(
+    val: &serde_json::Value,
+    conf: &Config,
+) -> Result<Measurement, TranslateError> {
     let mut mesurement: Measurement = Measurement::default();
 
     // add tags
@@ -155,11 +254,20 @@ fn new_from_mastodon_or_pleroma_user(val: &serde_json::Value, conf: &Config) -> 
 
     // add fields
     // followers
-    let followers: i64 = val["followers_count"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("followers".to_string(), DataField::Int(followers));
-    // local_posts
+    match val["followers_count"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("followers".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("followers"),
+            })
+        }
+    };
+
+    // following
     let following: i64 = match val["following_count"].as_i64() {
         Some(val) => val,
         None => 0,
@@ -167,13 +275,22 @@ fn new_from_mastodon_or_pleroma_user(val: &serde_json::Value, conf: &Config) -> 
     mesurement
         .fields
         .insert("following".to_string(), DataField::Int(following));
-    // posts
-    let status: i64 = val["statuses_count"].as_i64().unwrap();
-    mesurement
-        .fields
-        .insert("statuses".to_string(), DataField::Int(status));
 
-    return mesurement;
+    // posts
+    match val["statuses_count"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("statuses".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("statuses count"),
+            })
+        }
+    };
+
+    Ok(mesurement)
 }
 
 // Tests
@@ -195,7 +312,7 @@ mod tests {
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_or_pleroma(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma(&json, &conf).unwrap();
 
         assert_eq!(mesurement.fields["users"], DataField::Int(31));
         assert_eq!(mesurement.fields["posts"], DataField::Int(28354));
@@ -212,7 +329,7 @@ mod tests {
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_or_pleroma(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma(&json, &conf).unwrap();
 
         assert_eq!(mesurement.fields["users"], DataField::Int(132));
         assert_eq!(mesurement.fields["posts"], DataField::Int(30687));
@@ -229,7 +346,7 @@ mod tests {
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_or_pleroma_user(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma_user(&json, &conf).unwrap();
 
         assert_eq!(mesurement.fields["followers"], DataField::Int(274));
         assert_eq!(mesurement.fields["statuses"], DataField::Int(15392));
@@ -246,7 +363,7 @@ mod tests {
         let json = serde_json::from_reader(file).expect("Error parsing json file");
 
         // launch test
-        let mesurement = new_from_mastodon_or_pleroma_user(&json, &conf);
+        let mesurement = new_from_mastodon_or_pleroma_user(&json, &conf).unwrap();
 
         assert_eq!(mesurement.fields["followers"], DataField::Int(7));
         assert_eq!(mesurement.fields["statuses"], DataField::Int(42));

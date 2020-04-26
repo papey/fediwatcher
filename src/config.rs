@@ -81,13 +81,13 @@ impl From<url::ParseError> for ConfigError {
 
 // Structs - public
 // Options struct found in config files
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Options {
     user_id: Option<String>,
 }
 
 // Struct Config represent data read from conf.d files
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     // name of the config
     pub name: String,
