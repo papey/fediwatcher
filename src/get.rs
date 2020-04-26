@@ -5,6 +5,7 @@ use reqwest;
 use serde_json;
 use std::fmt;
 use std::string::String;
+use tokio::runtime::Runtime;
 
 // Errors
 // Define ForgeError
@@ -23,6 +24,7 @@ pub enum GetError {
     ReqwestError(reqwest::Error),
     SerdeError(serde_json::error::Error),
     ForgeError,
+    IOError(std::io::Error),
 }
 
 // implement From
@@ -37,6 +39,13 @@ impl From<reqwest::Error> for GetError {
 impl From<serde_json::Error> for GetError {
     fn from(err: serde_json::Error) -> GetError {
         GetError::SerdeError(err)
+    }
+}
+
+// IOError
+impl From<std::io::Error> for GetError {
+    fn from(err: std::io::Error) -> GetError {
+        GetError::IOError(err)
     }
 }
 
@@ -62,6 +71,12 @@ fn forge_api_url(conf: &Config) -> Option<String> {
 // Functions - Public
 // get_data is used to fetch remote data about a specified config
 pub fn get_data(conf: &Config) -> Result<serde_json::Value, GetError> {
+    // prepare a tokio runtime
+    let mut rt = match Runtime::new() {
+        Ok(rt) => rt,
+        Err(e) => return Err(GetError::IOError(e)),
+    };
+
     // forge uri
     let uri = match forge_api_url(&conf) {
         Some(uri) => uri,
@@ -72,11 +87,12 @@ pub fn get_data(conf: &Config) -> Result<serde_json::Value, GetError> {
     };
 
     // get request
-    let mut resp = reqwest::get(uri.as_str())?;
+    let resp = rt.block_on(reqwest::get(uri.as_str()))?;
 
     // extract resp to serde_json::Value
-    resp.text()
-        .map_err(|e| GetError::from(e))
+    let text = rt.block_on(resp.text());
+
+    text.map_err(|e| GetError::from(e))
         .and_then(|s| serde_json::from_str(s.as_str()).map_err(|e| GetError::from(e)))
 }
 
