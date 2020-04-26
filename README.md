@@ -81,7 +81,7 @@ See [drone.github.papey.fr/papey/fediwatcher](https://drone.github.papey.fr/pape
 
 ## Built With
 
-- [Influent.rs](https://github.com/gobwas/influent.rs) - InfluxDB rust library
+- [InfluxDB-rust](https://github.com/Empty2k12/influxdb-rust) - InfluxDB rust library
 - [Clap](https://github.com/clap-rs/clap) - Command line parser
 
 ## Contributing

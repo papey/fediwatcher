@@ -2,7 +2,7 @@ use crate::config;
 use crate::get;
 use crate::influx;
 use crate::influx::translate;
-use influent::client::ClientError as InfluentError;
+use influxdb::Error as InfluxError;
 
 // AppError
 // Define AppError
@@ -10,7 +10,7 @@ use influent::client::ClientError as InfluentError;
 pub enum AppError {
     GetError(get::GetError),
     Str(String),
-    InfluxError(InfluentError),
+    InfluxError(InfluxError),
     ConfigError(config::ConfigError),
     TranslateError(translate::TranslateError),
 }
@@ -30,8 +30,8 @@ impl From<String> for AppError {
 }
 
 // InfluxError
-impl From<InfluentError> for AppError {
-    fn from(err: InfluentError) -> AppError {
+impl From<InfluxError> for AppError {
+    fn from(err: InfluxError) -> AppError {
         AppError::InfluxError(err)
     }
 }
