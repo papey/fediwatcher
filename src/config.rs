@@ -1,7 +1,7 @@
 // Mod config - used to parse config files
 // Uses
 use serde::Deserialize;
-use std::{fmt, fs, vec::Vec};
+use std::{fmt, fs, io, vec::Vec};
 use url::Url;
 
 // Const
@@ -19,10 +19,20 @@ pub const SUPPORTED: [&str; 5] = [
 #[derive(Debug, Clone)]
 struct NotSupportedError {}
 
-// implements for ForgeError
+// implements for NotSupportedError
 impl fmt::Display for NotSupportedError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Error kind of config not supported")
+    }
+}
+
+// Define NoConfigError
+struct NoConfigError {}
+
+// implements for NoConfigError
+impl fmt::Display for NoConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "No config file found")
     }
 }
 
@@ -39,11 +49,12 @@ impl fmt::Display for UrlError {
 
 // Define ConfigError
 #[derive(Debug)]
-enum ConfigError {
+pub enum ConfigError {
     IOError(std::io::Error),
     TomlError(toml::de::Error),
     NotSupportedError,
     UrlError(url::ParseError),
+    NoConfigError,
 }
 
 // implement from
@@ -70,13 +81,13 @@ impl From<url::ParseError> for ConfigError {
 
 // Structs - public
 // Options struct found in config files
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Options {
     user_id: Option<String>,
 }
 
 // Struct Config represent data read from conf.d files
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Config {
     // name of the config
     pub name: String,
@@ -129,33 +140,23 @@ fn read_config_file(path: &std::path::PathBuf) -> Result<Config, ConfigError> {
     info!("Reading {} file", path.display());
 
     // try to read content
-    let content = match fs::read_to_string(&path) {
-        Ok(content) => content,
-        Err(e) => {
-            error!("Error reading {} file, moving on", &path.display());
-            return Err(ConfigError::from(e));
-        }
-    };
+    let content = fs::read_to_string(&path)?;
 
     // debug file content
     debug!("Content of file {}, is : \n{}", &path.display(), &content);
 
     // try desirializing toml file into config struct
-    let config: Config = match toml::from_str(&content) {
-        Ok(inst) => (inst),
-        Err(e) => {
-            error!("Error deserializing {} file, moving on", &path.display());
-            return Err(ConfigError::from(e));
-        }
-    };
+    let config: Config = toml::from_str(&content)?;
 
     // debug struct deserializing
     debug!("{}", &config);
 
     // check if kind is supported
     if SUPPORTED.contains(&config.kind.as_str()) {
-        // return config
-        Ok(config)
+        match verify_url(&config) {
+            Ok(_) => return Ok(config),
+            Err(e) => return Err(e),
+        }
     } else {
         // or error
         error!("{} kind of config not supported, moving on", &config.kind);
@@ -168,6 +169,7 @@ fn verify_url(conf: &Config) -> Result<(), ConfigError> {
     match Url::parse(&conf.url.as_str()) {
         Ok(_) => return Ok(()),
         Err(e) => {
+            error!("url {} is not valid", &conf.url.as_str());
             return Err(ConfigError::from(e));
         }
     };
@@ -186,39 +188,37 @@ pub fn create_test_config() -> Config {
 }
 
 // Get all configs from config.d
-pub fn get_configs_files(dir: &str) -> Option<Vec<Config>> {
-    // create vector containing configs read from directory
-    let mut configs = Vec::new();
-
-    // walk in dir
-    let paths = match fs::read_dir(dir) {
-        Ok(paths) => paths,
-        Err(_) => panic!("Error, unable to read {} directory", dir),
-    };
+pub fn get_configs_files(dir: &str) -> Result<Vec<Config>, ConfigError> {
+    // walk in dir and get files
+    let paths = fs::read_dir(dir)?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>()?;
 
     info!("Start reading all files in {} directory", dir);
 
-    // loop over all paths and read each entry
-    for entry in paths {
-        match read_config_file(&entry.unwrap().path()) {
-            Ok(c) => match verify_url(&c) {
-                Ok(_) => configs.push(c),
-                Err(e) => {
-                    debug!("Error url is not valid : {:?}", e);
-                    continue;
-                }
-            },
-            Err(_) => continue,
-        };
+    // loop over all paths and read each entry or associated error
+    let (res, errs): (Vec<_>, Vec<_>) = paths
+        .into_iter()
+        .map(|c| read_config_file(&c))
+        .partition(Result::is_ok);
+
+    // errors are wrapped into results, to unwrap errors
+    let errors: Vec<_> = errs.into_iter().map(Result::unwrap_err).collect();
+
+    // same for configs
+    let configs: Vec<_> = res.into_iter().map(Result::unwrap).collect();
+
+    // print errors
+    for err in errors {
+        error!("{:?}", err)
     }
 
-    // return vector containing configs, if not empty
+    // If some configs found return all of them
     if configs.len() > 0 {
-        // if theres is configs, return an option with configs in it
-        Some(configs)
+        return Ok(configs);
     } else {
-        // if not, return none
-        None
+        // If not return an error
+        return Err(ConfigError::NoConfigError);
     }
 }
 
