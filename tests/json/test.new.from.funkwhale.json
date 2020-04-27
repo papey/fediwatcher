@@ -1,0 +1,105 @@
+{
+    "version": "2.0",
+    "software": {
+        "name": "funkwhale",
+        "version": "0.21+git.09f185ae"
+    },
+    "protocols": [
+        "activitypub"
+    ],
+    "services": {
+        "inbound": [],
+        "outbound": []
+    },
+    "openRegistrations": false,
+    "usage": {
+        "users": {
+            "total": 16,
+            "activeHalfyear": 0,
+            "activeMonth": 0
+        }
+    },
+    "metadata": {
+        "actorId": "https://demo.funkwhale.audio/federation/actors/service",
+        "private": false,
+        "shortDescription": "",
+        "longDescription": "",
+        "rules": "",
+        "contactEmail": "",
+        "terms": "",
+        "nodeName": "Login: demo / password: demo",
+        "banner": null,
+        "defaultUploadQuota": 1000,
+        "library": {
+            "federationEnabled": true,
+            "anonymousCanListen": true,
+            "tracks": {
+                "total": 124
+            },
+            "artists": {
+                "total": 17
+            },
+            "albums": {
+                "total": 20
+            },
+            "music": {
+                "hours": 9.176111111111112
+            }
+        },
+        "supportedUploadExtensions": [
+            "aac",
+            "flac",
+            "m4a",
+            "mp3",
+            "ogg",
+            "opus"
+        ],
+        "allowList": {
+            "enabled": false,
+            "domains": null
+        },
+        "reportTypes": [
+            {
+                "type": "takedown_request",
+                "label": "Takedown request",
+                "anonymous": true
+            },
+            {
+                "type": "invalid_metadata",
+                "label": "Invalid metadata",
+                "anonymous": false
+            },
+            {
+                "type": "illegal_content",
+                "label": "Illegal content",
+                "anonymous": true
+            },
+            {
+                "type": "offensive_content",
+                "label": "Offensive content",
+                "anonymous": false
+            },
+            {
+                "type": "other",
+                "label": "Other",
+                "anonymous": false
+            }
+        ],
+        "funkwhaleSupportMessageEnabled": true,
+        "instanceSupportMessage": "",
+        "knownNodesListUrl": "https://demo.funkwhale.audio/api/v1/federation/domains",
+        "usage": {
+            "favorites": {
+                "tracks": {
+                    "total": 267
+                }
+            },
+            "listenings": {
+                "total": 284
+            },
+            "downloads": {
+                "total": 0
+            }
+        }
+    }
+}

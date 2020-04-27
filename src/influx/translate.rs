@@ -77,6 +77,7 @@ pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, T
         "mastodon" | "pleroma" => new_from_mastodon_or_pleroma(val, conf),
         "mastodon_user" | "pleroma_user" => new_from_mastodon_or_pleroma_user(val, conf),
         "plume" => new_from_plume(val, conf),
+        "funkwhale" => new_from_funkwhale(val, conf),
         _ => panic!(
             "Unrecoverable error config of kind {} not supported",
             conf.kind
@@ -85,6 +86,99 @@ pub fn new_from(val: &serde_json::Value, conf: &Config) -> Result<Measurement, T
 }
 
 // Function - private
+// new_from_funkwhale will take data from funkwhale instance and convert it into a Measurement
+fn new_from_funkwhale(
+    val: &serde_json::Value,
+    conf: &Config,
+) -> Result<Measurement, TranslateError> {
+    let mut mesurement: Measurement = Measurement::default();
+
+    // add tags
+    // kind is the key
+    mesurement.key = conf.kind.clone();
+
+    // name
+    mesurement
+        .tags
+        .insert("name".to_string(), conf.name.clone());
+    // url
+    mesurement.tags.insert("url".to_string(), conf.url.clone());
+
+    // add fields
+    // user count
+    match val["usage"]["users"]["total"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("users".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                field: String::from("users total"),
+                kind: conf.kind.clone(),
+                url: conf.url.clone(),
+            })
+        }
+    };
+
+    // library
+    // tracks total
+    match val["metadata"]["library"]["tracks"]["total"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("tracks".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                field: String::from("tracks total"),
+                kind: conf.kind.clone(),
+                url: conf.url.clone(),
+            })
+        }
+    };
+
+    // albums total
+    match val["metadata"]["library"]["albums"]["total"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("albums".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                field: String::from("albums total"),
+                kind: conf.kind.clone(),
+                url: conf.url.clone(),
+            })
+        }
+    };
+
+    // artists total
+    match val["metadata"]["library"]["artists"]["total"].as_i64() {
+        Some(val) => mesurement
+            .fields
+            .insert("artists".to_string(), DataField::Int(val)),
+        None => {
+            return Err(TranslateError {
+                field: String::from("artists total"),
+                kind: conf.kind.clone(),
+                url: conf.url.clone(),
+            })
+        }
+    };
+
+    // version
+    match val["version"].as_str() {
+        Some(val) => mesurement
+            .fields
+            .insert("version".to_string(), DataField::Str(val.to_string())),
+        None => {
+            return Err(TranslateError {
+                url: conf.url.clone(),
+                kind: conf.kind.clone(),
+                field: String::from("version"),
+            })
+        }
+    };
+
+    Ok(mesurement)
+}
+
 // new_from_plume will take data from plume instance and convert it into a Measurement
 fn new_from_plume(val: &serde_json::Value, conf: &Config) -> Result<Measurement, TranslateError> {
     let mut mesurement: Measurement = Measurement::default();
@@ -367,5 +461,22 @@ mod tests {
 
         assert_eq!(mesurement.fields["followers"], DataField::Int(7));
         assert_eq!(mesurement.fields["statuses"], DataField::Int(42));
+    }
+
+    #[test]
+    fn test_new_from_funkwhale() {
+        // prepare
+        let conf = create_test_config();
+
+        let file = File::open("./tests/json/test.new.from.funkwhale.json")
+            .expect("Unable to read test file");
+
+        let json = serde_json::from_reader(file).expect("Error parsing json file");
+
+        // launch test
+        let measurement = new_from_funkwhale(&json, &conf).unwrap();
+
+        assert_eq!(measurement.fields["albums"], DataField::Int(20));
+        assert_eq!(measurement.fields["artists"], DataField::Int(17));
     }
 }
