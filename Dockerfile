@@ -37,4 +37,4 @@ RUN rm ./target/release/deps/fediwatcher*
 RUN cargo build --release
 
 # Finaly, setup command
-CMD ["./target/release/fediwatcher"]
+ENTRYPOINT ["./target/release/fediwatcher"]
