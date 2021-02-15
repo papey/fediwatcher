@@ -12,6 +12,7 @@ Fediwatcher currently supports :
 - Mastodon User : to get metrics from a specific user on a Mastodon instance
 - Pleroma : to get metrics from a Pleroma instance
 - Pleroma User : to get metrics from a specific user on a Pleroma instance
+- Funkwhale : to get metrics from a Funkwhale instance
 
 ## Getting Started
 
@@ -68,6 +69,10 @@ To specify a custom InfluxDB server, Fediwatcher use environment variables, eg :
 
 In order to refresh data, you need to run fediwatcher periodicaly using
 systemd timers or any other method of your choice.
+
+##### Mastodon User
+
+For Mastodoun User to work, your instance needs to run without the whitelist mode
 
 ## Running the tests
 
