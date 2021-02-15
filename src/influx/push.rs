@@ -3,6 +3,7 @@
 use crate::influx::translate::{DataField, Measurement};
 use influxdb::InfluxDbWriteable;
 use influxdb::{Client, Error, Timestamp};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::runtime::Runtime;
 
 // Functions - public
@@ -19,7 +20,7 @@ pub fn create_influx_client<'a>(
 // push_measurement push measurement paramater to output configured in client
 pub fn push_measurement(client: &Client, measurement: Measurement) -> Result<String, Error> {
     // init query
-    let mut query = Timestamp::Now.into_query(&measurement.key);
+    let mut query = Timestamp::Microseconds(ts()).into_query(&measurement.key);
 
     // for each field add to query
     for (key, value) in measurement.fields.iter() {
@@ -42,4 +43,12 @@ pub fn push_measurement(client: &Client, measurement: Measurement) -> Result<Str
 
     // write query, handle future simply with block on
     Runtime::new().unwrap().block_on(client.query(&query))
+}
+
+// timestamp will compute from EPOCH timestamp
+fn ts() -> u128 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time goes backward ?")
+        .as_millis()
 }
